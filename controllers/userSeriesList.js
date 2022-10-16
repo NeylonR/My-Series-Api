@@ -1,0 +1,1 @@
+const UserSeriesList = require('../models/UserSeriesList');
