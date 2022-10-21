@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const app = express();
 
 const userRoutes = require('./routes/user');
-// const todolistRoutes = require('./routes/todolist');
+const userSeriesListRoutes = require('./routes/userSeriesList');
 
 mongoose.connect('mongodb+srv://admin:admin@cluster0.rmm0vg1.mongodb.net/?retryWrites=true&w=majority',
   { useNewUrlParser: true,
@@ -22,5 +22,5 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/auth', userRoutes);
-// app.use('/api/todolist', todolistRoutes);
+app.use('/api/userSeriesList', userSeriesListRoutes);
 module.exports = app;

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const UserList = require('../models/UserSeriesList');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -9,8 +10,18 @@ exports.signup = (req, res) => {
                 email : req.body.email.toLowerCase().trim().toString(), 
                 password : hash
             });
+            const userList = new UserList({
+                creator_id : user._id,
+                watching: [],
+                completed: [],
+                planToWatch: [],
+            })
+            console.log(userList)
             user.save()
-                .then(() => res.status(201).json({ message: 'User created.'}))
+                .then(() => {
+                    userList.save()
+                    return res.status(201).json({ message: 'User created.'})
+                })
                 .catch(error => res.status(400).json({ error, message : 'Mail already used.' }));
         })
         .catch(error => res.status(500).json({ error }));

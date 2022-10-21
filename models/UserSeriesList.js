@@ -2,16 +2,21 @@ const mongoose = require('mongoose');
 
 const userSeriesList = mongoose.Schema({
     creator_id: { type: String, required: true},
-    watched: { 
-        type: [{ id: String }], 
+    watching: { 
+        type: [ String ], 
         default: undefined,
         required: true
     },
-    planned: { 
-        type: [{ id: String }], 
+    completed: { 
+        type: [ String ], 
+        default: undefined,
+        required: true
+    },
+    planToWatch: { 
+        type: [ String ], 
         default: undefined,
         required: true
     },
 });
 
-module.exports = mongoose.model('Todolist', userSeriesList);
+module.exports = mongoose.model('UserSeriesList', userSeriesList);
