@@ -12,9 +12,7 @@ exports.signup = (req, res) => {
             });
             const userList = new UserList({
                 creator_id : user._id,
-                watching: [],
-                completed: [],
-                planToWatch: [],
+                series: [],
             })
             console.log(userList)
             user.save()
