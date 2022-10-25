@@ -5,7 +5,9 @@ const userSeriesList = mongoose.Schema({
     series: { 
         type: [{ 
             id: String, 
-            category: String
+            status: String,
+            image_url: String,
+            name: String
         }], 
         default: undefined,
         required: true

@@ -1,18 +1,29 @@
 const UserSeriesList = require('../models/UserSeriesList');
 
 exports.editList = (req, res) => {
-    delete req.body._id;
-    UserSeriesList.findOne({ _id: req.params.id})
+    UserSeriesList.findOne({ creator_id: req.auth.userId })
     .then((userSeriesList) => {
         if(userSeriesList.creator_id !== req.auth.userId) return res.status(401).json({message: "Not authorized"});
-        UserSeriesList.updateOne({ _id: req.params.id}, {...req.body})
-            .then(() => { res.status(200).json({message: 'UserSeriesList edited.'})})
-            .catch(error => res.status(401).json({ error }));
+        const serieStatus = req.body?.formSelect;
+        UserSeriesList.updateOne(
+            { creator_id: req.auth.userId, "series.id": req.params.id },
+            { $set: { 
+                "series.$.status": serieStatus
+                } 
+            }
+        )
+        .then(() => {
+            // we send the updated list as the response
+            UserSeriesList.findOne({ creator_id: req.auth.userId})
+                .then(userSeriesList => res.status(200).json(userSeriesList))
+                .catch(error => res.status(401).json({ error }));
+            })
+        .catch(error => res.status(401).json({ error }));
     })
+    .catch(error => res.status(401).json({ error }));
 };
 
 exports.addToList = (req, res) => {
-    // console.log(req.body)
     UserSeriesList.findOne({ creator_id: req.auth.userId })
     .then((userSeriesList) => {
     // console.log(userSeriesList)
@@ -24,13 +35,17 @@ exports.addToList = (req, res) => {
         if(duplicate) return;
 
         //add the serie to the array using the id and the category( watching/completed/planToWatch)
-        const serieCategory = req.body?.formSelect;
+        const serieStatus = req.body?.formSelect;
+        const serieImageUrl = req.body?.image_url;
+        const serieName = req.body?.name;
         UserSeriesList.updateOne(
             { creator_id: req.auth.userId },
             { $addToSet: { 
                 series: {
                     id : req.params.id, 
-                    category : serieCategory
+                    status : serieStatus,
+                    image_url: serieImageUrl,
+                    name: serieName,
                     }
                 } 
             }
@@ -42,19 +57,32 @@ exports.addToList = (req, res) => {
 };
 
 exports.getUserList = (req, res) => {
-    // console.log(req.auth.userId)
     UserSeriesList.findOne({ creator_id: req.auth.userId})
     .then(userSeriesList => res.status(200).json(userSeriesList))
     .catch(error => res.status(401).json({ error }));
 };
 
 exports.deleteFromList = (req, res) => {
-    UserSeriesList.findOne({ _id: req.params.id})
+    UserSeriesList.findOne({ creator_id: req.auth.userId })
         .then(userSeriesList => {
             if(userSeriesList.creator_id !== req.auth.userId) return res.status(401).json({message: "Not authorized"});
-            UserSeriesList.deleteOne({ _id: req.params.id})
-                .then(() => { res.status(200).json({message: 'userSeriesList deleted.'})})
-                .catch(error => res.status(401).json({ error }));
+            // if user is the creator > remove the serie from the array that match the id and _id
+            UserSeriesList.updateOne(
+                { creator_id: req.auth.userId },
+                { $pull: {
+                    series: {
+                        id: req.params.id,
+                        _id: req.body.serie_Id
+                    }
+                }}
+            )
+            .then(() => {
+                // we send the updated list as the response
+                UserSeriesList.findOne({ creator_id: req.auth.userId})
+                    .then(userSeriesList => res.status(200).json(userSeriesList))
+                    .catch(error => res.status(401).json({ error }));
+                })
+            .catch(error => res.status(401).json({ error }));
     })
     .catch(error => res.status(404).json({ error }));
 };
