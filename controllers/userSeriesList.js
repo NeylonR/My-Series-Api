@@ -50,7 +50,12 @@ exports.addToList = (req, res) => {
                 } 
             }
         )
-        .then((res) => { console.log(res)})
+        .then(() => {
+            // we send the updated list as the response
+            UserSeriesList.findOne({ creator_id: req.auth.userId})
+                .then(userSeriesList => res.status(200).json(userSeriesList))
+                .catch(error => res.status(401).json({ error }));
+            })
         .catch(error => res.status(401).json({ error }));
     })
     .catch(error => res.status(401).json({ error }));

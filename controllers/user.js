@@ -14,7 +14,7 @@ exports.signup = (req, res) => {
                 creator_id : user._id,
                 series: [],
             })
-            console.log(userList)
+            // console.log(userList)
             user.save()
                 .then(() => {
                     userList.save()
@@ -32,7 +32,7 @@ exports.login = async (req, res) => {
     if (!email || !password) return res.status(400).json({ 'message': 'Username and password are required.' });
 
     const foundUser = await User.findOne({ email: email }).exec();
-    if (!foundUser) return res.sendStatus(401); //Unauthorized 
+    if (!foundUser) return res.status(401).json({ message : 'Wrong email/password'}); //Unauthorized 
     // evaluate password 
     const match = await bcrypt.compare(password, foundUser.password);
     if (match) {
